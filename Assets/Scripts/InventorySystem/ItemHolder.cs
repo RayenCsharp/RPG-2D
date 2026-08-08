@@ -3,14 +3,15 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class ItemHolder : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("Ui References")]
+    [SerializeField] private Transform dragLayer;
+    [SerializeField] private CanvasGroup itemHolderCanvas;
     [SerializeField] private GameObject icon;
     [SerializeField] private Image itemIcon;
     [SerializeField] private TMP_Text itemQuantitytxt;
-    [SerializeField] private bool isHovering;
-    public bool IsHovering => isHovering;
+    private Transform OrignalParent;
 
     [Header("Item Properties")]
     private ItemData itemHeld;
@@ -20,11 +21,14 @@ public class ItemHolder : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         itemIcon = icon.GetComponent<Image>();
         itemQuantitytxt = GetComponentInChildren<TMP_Text>();
+        itemHolderCanvas = GetComponent<CanvasGroup>();
     }
 
     void Start()
     {
         UpdateSlot();
+        OrignalParent = transform.parent;
+
     }
     
     public ItemData ItemHeld => itemHeld;
@@ -85,14 +89,20 @@ public class ItemHolder : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         return itemHeld != null;
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnBeginDrag(PointerEventData eventData)
     {
-        isHovering = true;
+        transform.SetParent(dragLayer);
+        itemHolderCanvas.blocksRaycasts = false;
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnDrag(PointerEventData eventData)
     {
-        isHovering = false;
+        transform.position = eventData.position;
+    }
 
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        transform.SetParent(OrignalParent);
+        itemHolderCanvas.blocksRaycasts = true;
     }
 }

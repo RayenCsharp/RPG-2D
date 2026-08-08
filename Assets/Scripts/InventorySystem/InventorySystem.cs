@@ -13,10 +13,10 @@ public class InventorySystem : MonoBehaviour
     private List<ItemHolder> MainInventorySlots = new List<ItemHolder>();
     private List<ItemHolder> HotBarSlots = new List<ItemHolder>();
     private List<ItemHolder> HoleInventory = new List<ItemHolder>();
-    [Header("Dragging Properties")]
-    [SerializeField] private Image draggedItemUi;
-    [SerializeField] private ItemHolder draggedItem;
-    private bool isDragging = false;
+    //[Header("Dragging Properties")]
+    //[SerializeField] private Image draggedItemUi;
+    //[SerializeField] private ItemHolder draggedItem;
+    //private bool isDragging = false;
 
     void Awake()
     {
@@ -37,9 +37,9 @@ public class InventorySystem : MonoBehaviour
             AddItem(Sword, 1);
 
         }
-        OnDrageStart();
-        OnDrageEnd();
-        DragUi();
+        //OnDrageStart();
+        //OnDrageEnd();
+        //DragUi();
     }
 
     public void AddItem(ItemData item, int amount)
@@ -77,50 +77,53 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    private ItemHolder GetHoveredItem()
-    {
-        foreach (ItemHolder slot in HoleInventory)
-        {
-            if (slot.IsHovering)
-            {
-                return slot;
-            }
-        }
-        return null;
-    }
+    //private ItemHolder GetHoveredItem()
+    //{
+    //    foreach (ItemHolder slot in HoleInventory)
+    //    {
+    //        if (slot.IsHovering)
+    //        {
+    //            return slot;
+    //        }
+    //    }
+    //    return null;
+    //}
 
-    private void OnDrageStart()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            ItemHolder HoveredItem = GetHoveredItem();
-            if (HoveredItem != null && HoveredItem.HasItem())
-            {
-                draggedItem = HoveredItem;
-                draggedItemUi = HoveredItem.GetComponent<Image>();
-                isDragging = true;
-            }
-        }
-    }
+    //private void OnDrageStart()
+    //{
+    //    if (Input.GetMouseButtonDown(0))
+    //    {
+    //        ItemHolder HoveredItem = GetHoveredItem();
+    //        if (HoveredItem != null && HoveredItem.HasItem())
+    //        {
+    //            draggedItem = HoveredItem;
+    //            draggedItemUi = HoveredItem.GetComponent<Image>();
+    //            isDragging = true;
+    //        }
+    //    }
+    //}
 
-    private void OnDrageEnd()
-    {
-        if (Input.GetMouseButtonUp(0) && isDragging)
-        {
-            ItemHolder HoveredItem = GetHoveredItem();
-            if (HoveredItem != null)
-            {
-                HandleDrop(draggedItem, HoveredItem);
-                isDragging = false;
-                draggedItem = null;
-            }
-        }
-    }
+    //private void OnDrageEnd()
+    //{
+    //    if (Input.GetMouseButtonUp(0) && isDragging)
+    //    {
+    //        ItemHolder HoveredItem = GetHoveredItem();
+    //        if (HoveredItem != null)
+    //        {
+    //            HandleDrop(draggedItem, HoveredItem);
+    //            isDragging = false;
+    //            draggedItem = null;
+    //        }
+    //    }
+    //}
 
-    private void HandleDrop(ItemHolder draggedItem, ItemHolder draggedTo)
+    public void HandleDrop(ItemHolder draggedItem, ItemHolder draggedTo)
     {
-        if (draggedItem == draggedTo)
+        if (draggedItem == draggedTo || draggedItem == null || draggedTo == null)
+        {
+            Debug.Log("dragged item :" + draggedItem + "dragged to:" + draggedTo);
             return;
+        }
         //stacking
         if (draggedItem.ItemHeld == draggedTo.ItemHeld)
         {
@@ -143,22 +146,22 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    private void DragUi()
-    {
-        if (draggedItemUi != null)
-        {
-            if (isDragging)
-            {
-                draggedItemUi.transform.position = Input.mousePosition;
-                //draggedItemUi.transform.parent.SetAsFirstSibling();
-                draggedItemUi.raycastTarget = false;
-            }
-            else
-            {
-                draggedItemUi.transform.localPosition = Vector3.zero;
-                draggedItemUi.raycastTarget = true;
-                draggedItemUi = null;
-            }
-        }
-    }
+    //private void DragUi()
+    //{
+    //    if (draggedItemUi != null)
+    //    {
+    //        if (isDragging)
+    //        {
+    //            draggedItemUi.transform.position = Input.mousePosition;
+    //            //draggedItemUi.transform.parent.SetAsFirstSibling();
+    //            draggedItemUi.raycastTarget = false;
+    //        }
+    //        else
+    //        {
+    //            draggedItemUi.transform.localPosition = Vector3.zero;
+    //            draggedItemUi.raycastTarget = true;
+    //            draggedItemUi = null;
+    //        }
+    //    }
+    //}
 }
