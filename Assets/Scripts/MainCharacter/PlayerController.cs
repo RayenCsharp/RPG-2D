@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] private new Rigidbody2D rigidbody;
     [SerializeField] private Animator animator;
+    [SerializeField] private InventorySystem inventorySystem;
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rigidbody = GetComponent<Rigidbody2D>();
+        inventorySystem = GetComponent<InventorySystem>();
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -48,9 +50,11 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        if (!canMove)
+        
+        if (!canMove || inventorySystem.InventoryOpen)
         {
             rigidbody.linearVelocity = Vector2.zero;
+            animator.SetBool("IsMoving", false);
             return;
         }
         rigidbody.linearVelocity = movementDirection * moveSpeed;

@@ -7,7 +7,7 @@ public class Slot : MonoBehaviour, IDropHandler
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        inventorySys = GetComponentInParent<InventorySystem>();
+        inventorySys = GameObject.Find("MainCharacter").GetComponent<InventorySystem>();
     }
 
     // Update is called once per frame

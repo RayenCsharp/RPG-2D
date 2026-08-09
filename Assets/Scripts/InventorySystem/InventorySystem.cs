@@ -1,45 +1,42 @@
-using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEngine.UI;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InventorySystem : MonoBehaviour
 {
-    [SerializeField] private ItemData Stone;
-    [SerializeField] private ItemData Sword;
+    [SerializeField] private PlayerController playerController;
     [Header("Inventory References")]
     [SerializeField] private GameObject mainInvetory;
     [SerializeField] private GameObject hotBarInventory;
     private List<ItemHolder> MainInventorySlots = new List<ItemHolder>();
     private List<ItemHolder> HotBarSlots = new List<ItemHolder>();
     private List<ItemHolder> HoleInventory = new List<ItemHolder>();
-    //[Header("Dragging Properties")]
-    //[SerializeField] private Image draggedItemUi;
-    //[SerializeField] private ItemHolder draggedItem;
-    //private bool isDragging = false;
+    [Header("Bindings Proprities")]
+    private bool inventoryOpen;
+    public bool InventoryOpen => inventoryOpen;
+    [Header("PickUp Proprities")]
+    [SerializeField] private GameObject pickUpItem;
+    private ItemPickUp newItem;
+    private GameObject hightLightedItem;
+    [SerializeField] private Vector2 pickUpRange;
+    [SerializeField] private Vector2 offSetRange;
+    [SerializeField] private LayerMask layer;
 
     void Awake()
     {
+        playerController = GetComponent<PlayerController>();
         MainInventorySlots.AddRange(mainInvetory.GetComponentsInChildren<ItemHolder>());
         HotBarSlots.AddRange(hotBarInventory.GetComponentsInChildren<ItemHolder>());
-        HoleInventory.AddRange(MainInventorySlots);
         HoleInventory.AddRange(HotBarSlots);
+        HoleInventory.AddRange(MainInventorySlots);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            AddItem(Stone, 5);
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            AddItem(Sword, 1);
-
-        }
-        //OnDrageStart();
-        //OnDrageEnd();
-        //DragUi();
+        PickUpDetection();
     }
 
     public void AddItem(ItemData item, int amount)
@@ -77,46 +74,6 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    //private ItemHolder GetHoveredItem()
-    //{
-    //    foreach (ItemHolder slot in HoleInventory)
-    //    {
-    //        if (slot.IsHovering)
-    //        {
-    //            return slot;
-    //        }
-    //    }
-    //    return null;
-    //}
-
-    //private void OnDrageStart()
-    //{
-    //    if (Input.GetMouseButtonDown(0))
-    //    {
-    //        ItemHolder HoveredItem = GetHoveredItem();
-    //        if (HoveredItem != null && HoveredItem.HasItem())
-    //        {
-    //            draggedItem = HoveredItem;
-    //            draggedItemUi = HoveredItem.GetComponent<Image>();
-    //            isDragging = true;
-    //        }
-    //    }
-    //}
-
-    //private void OnDrageEnd()
-    //{
-    //    if (Input.GetMouseButtonUp(0) && isDragging)
-    //    {
-    //        ItemHolder HoveredItem = GetHoveredItem();
-    //        if (HoveredItem != null)
-    //        {
-    //            HandleDrop(draggedItem, HoveredItem);
-    //            isDragging = false;
-    //            draggedItem = null;
-    //        }
-    //    }
-    //}
-
     public void HandleDrop(ItemHolder draggedItem, ItemHolder draggedTo)
     {
         if (draggedItem == draggedTo || draggedItem == null || draggedTo == null)
@@ -146,22 +103,70 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    //private void DragUi()
-    //{
-    //    if (draggedItemUi != null)
-    //    {
-    //        if (isDragging)
-    //        {
-    //            draggedItemUi.transform.position = Input.mousePosition;
-    //            //draggedItemUi.transform.parent.SetAsFirstSibling();
-    //            draggedItemUi.raycastTarget = false;
-    //        }
-    //        else
-    //        {
-    //            draggedItemUi.transform.localPosition = Vector3.zero;
-    //            draggedItemUi.raycastTarget = true;
-    //            draggedItemUi = null;
-    //        }
-    //    }
-    //}
+    void OnInventoryToggle(InputValue value)
+    {
+        mainInvetory.SetActive(!mainInvetory.activeInHierarchy);
+        inventoryOpen = mainInvetory.activeInHierarchy;
+    }
+
+    void OnPick (InputValue value)
+    {
+        if (newItem != null)
+        {
+            AddItem(newItem.ItemData, 1);
+            Destroy(pickUpItem);
+            pickUpItem = null;
+            newItem = null;
+        }
+        else
+        {
+            Debug.Log("Nothing To Pick Up");
+        }
+    }
+
+    private void PickUpDetection()
+    {
+        Collider2D[] hits = Physics2D.OverlapBoxAll(
+            (Vector2)transform.position + offSetRange,
+            pickUpRange,
+            0f,
+            layer
+        );
+        Collider2D firstPickUp = hits.Length > 0 ? hits[0] : null;
+
+        if (firstPickUp != null)
+        {
+            Debug.Log(firstPickUp);
+            pickUpItem = firstPickUp.gameObject;
+            newItem = pickUpItem.GetComponent<ItemPickUp>();
+            pickUpItem.GetComponent<SpriteRenderer>().sprite = newItem.HightLightedSprite;
+            if (hightLightedItem != null && hightLightedItem != pickUpItem)
+            {
+                hightLightedItem.GetComponent<SpriteRenderer>().sprite = hightLightedItem.GetComponent<ItemPickUp>().OriginalSprite;
+            }
+            hightLightedItem = pickUpItem;
+        }
+        else
+        {
+            if (pickUpItem != null)
+            {
+                pickUpItem.GetComponent<SpriteRenderer>().sprite = newItem.OriginalSprite;
+                pickUpItem = null;
+                newItem = null;
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (newItem != null)
+        {
+            Gizmos.color = Color.green;
+        }
+        else
+        {
+            Gizmos.color = Color.red;
+        }
+        Gizmos.DrawWireCube((Vector2)transform.position + offSetRange, pickUpRange);
+    }
 }

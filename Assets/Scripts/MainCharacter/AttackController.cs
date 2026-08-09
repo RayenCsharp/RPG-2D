@@ -7,6 +7,7 @@ public class AttackController : MonoBehaviour
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private PlayerController playerController;
     [SerializeField] private WeaponBehavour weaponBehavour;
+    [SerializeField] private InventorySystem inventorySystem;
 
     [SerializeField] private Transform weaponEquipped;
     [SerializeField] private CapsuleCollider2D weaponCollider;
@@ -19,6 +20,7 @@ public class AttackController : MonoBehaviour
     {
         playerAnimator = GetComponent<Animator>();
         playerController = GetComponent<PlayerController>();
+        inventorySystem = GetComponent<InventorySystem>();
         weaponBehavour = GetComponentInChildren<WeaponBehavour>();
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -40,7 +42,7 @@ public class AttackController : MonoBehaviour
 
     void OnAttack(InputValue value)
     {
-        if (value.isPressed && playerController.canAttack)
+        if (value.isPressed && playerController.canAttack && !inventorySystem.InventoryOpen)
         {
             float attackSpeedMultiplier = 0.45f / equipedWeapon.AttackTime;
             playerAnimator.SetFloat("AttackSpeedMultiplier", attackSpeedMultiplier);
