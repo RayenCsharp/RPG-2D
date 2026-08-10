@@ -13,7 +13,7 @@ public class ItemData : ScriptableObject
     public enum dataType { Consumable, Tool, Other, Placeable }
     [SerializeField] private dataType type;
     [Header("Placeable Properties")]
-    [SerializeField] private GameObject pickUpPrefab;
+    [SerializeField] private GameObject prefab;
 
     public string Id => id;
     public string Name => name;
@@ -21,6 +21,6 @@ public class ItemData : ScriptableObject
     public Sprite Icon => icon;
     public int MaxAmount => maxAmount;
     public dataType Type => type;
-    public GameObject PickUpPrefab => pickUpPrefab;
+    public GameObject Prefab => prefab;
 
 }

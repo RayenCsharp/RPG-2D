@@ -18,7 +18,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: a896bfcce98a6614bb15dce0b3ce4c5b, type: 3}
   maxAmount: 1
   type: 1
-  pickUpPrefab: {fileID: 0}
+  prefab: {fileID: 6992012535257786272, guid: 0717632cd6157b6478fc8e8e4658c2fd, type: 3}
   toolType: 0
   durability: 0
   damage: 0

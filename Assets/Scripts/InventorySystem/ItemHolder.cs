@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Ui References")]
     [SerializeField] private Transform dragLayer;
@@ -12,6 +12,8 @@ public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     [SerializeField] private Image itemIcon;
     [SerializeField] private TMP_Text itemQuantitytxt;
     private Transform OrignalParent;
+    [SerializeField] private bool isHovering;
+    public bool IsHovering => isHovering;
 
     [Header("Item Properties")]
     private ItemData itemHeld;
@@ -104,5 +106,15 @@ public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     {
         transform.SetParent(OrignalParent);
         itemHolderCanvas.blocksRaycasts = true;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        isHovering = true;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        isHovering = false;
     }
 }

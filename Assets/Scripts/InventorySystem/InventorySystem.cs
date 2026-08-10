@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class InventorySystem : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private Vector2 pickUpRange;
     [SerializeField] private Vector2 offSetRange;
     [SerializeField] private LayerMask layer;
+    [Header("Select Proprities")]
+    [SerializeField] private ItemHolder selectedItem;
+    [SerializeField] private float dropForce;
 
     void Awake()
     {
@@ -33,10 +37,16 @@ public class InventorySystem : MonoBehaviour
         HoleInventory.AddRange(HotBarSlots);
         HoleInventory.AddRange(MainInventorySlots);
     }
+    private void Start()
+    {
+        selectedItem = HotBarSlots[0];
+        UpdateSlectUi();
+    }
 
     private void Update()
     {
         PickUpDetection();
+        SelectFromHotBar();
     }
 
     public void AddItem(ItemData item, int amount)
@@ -136,7 +146,6 @@ public class InventorySystem : MonoBehaviour
 
         if (firstPickUp != null)
         {
-            Debug.Log(firstPickUp);
             pickUpItem = firstPickUp.gameObject;
             newItem = pickUpItem.GetComponent<ItemPickUp>();
             pickUpItem.GetComponent<SpriteRenderer>().sprite = newItem.HightLightedSprite;
@@ -168,5 +177,59 @@ public class InventorySystem : MonoBehaviour
             Gizmos.color = Color.red;
         }
         Gizmos.DrawWireCube((Vector2)transform.position + offSetRange, pickUpRange);
+    }
+
+    private void SelectFromHotBar()
+    {
+        for (int i = 0; i < HotBarSlots.Count; i++)
+        {
+            if (Input.GetKeyDown((i + 1).ToString()))
+            {
+                selectedItem = HotBarSlots[i];
+                UpdateSlectUi();
+            }
+        }
+    }
+    private void UpdateSlectUi()
+    {
+        for(int i = 0; i < HotBarSlots.Count; i++)
+        {
+            Image selectedImage = HotBarSlots[i].transform.parent.GetComponent<Image>();
+            selectedImage.color = (HotBarSlots[i] == selectedItem) ? new Color(selectedImage.color.r, selectedImage.color.g, selectedImage.color.b, 225) : new Color(selectedImage.color.r, selectedImage.color.g, selectedImage.color.b, 0);
+        }
+    }
+
+    private void OnDropItem(InputValue Value)
+    {
+        ItemHolder itemToDrop;
+        if (!InventoryOpen)
+        {
+            itemToDrop = selectedItem;
+        }
+        else
+        {
+            itemToDrop = HoveredItemFilter();
+        }
+
+        if (itemToDrop == null)
+            return;
+        if (!itemToDrop.HasItem())
+            return;
+        
+        Debug.Log("Drop Item :" + itemToDrop.ItemHeld.Name);
+        GameObject item = Instantiate(itemToDrop.ItemHeld.Prefab, transform.position, quaternion.identity);
+        itemToDrop.RemoveAmmount(1);
+        Rigidbody2D itemRb = item.GetComponent<Rigidbody2D>();
+        itemRb.AddForce(playerController.LastMovementDirection * dropForce, ForceMode2D.Impulse);
+    }
+
+    private ItemHolder HoveredItemFilter()
+    {
+        foreach (ItemHolder item in HoleInventory)
+        {
+            if (item.IsHovering)
+                return item;
+        }
+        return null;
     }
 }
