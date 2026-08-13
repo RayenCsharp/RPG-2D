@@ -1,4 +1,3 @@
-using UnityEditor.Animations;
 using UnityEngine;
 
 public class WeaponBehavour : MonoBehaviour
@@ -9,7 +8,7 @@ public class WeaponBehavour : MonoBehaviour
     [SerializeField] private Collider2D attackZoneCollider;
     private AnimatorOverrideController overrideController;
 
-    private WeaponData equipedWeapon;
+    private ToolData equipedTool;
 
     void Awake()
     {
@@ -32,6 +31,9 @@ public class WeaponBehavour : MonoBehaviour
         {
             weaponSpriteRenderer.sortingOrder = 0;
 
+        }else if ((playerController.LastMovementDirection.y == 0 && playerController.LastMovementDirection.x == 1) || (playerController.LastMovementDirection.y == 0 && playerController.LastMovementDirection.x == -1))
+        {
+            weaponSpriteRenderer.sortingOrder = 0;
         }
         else
         {
@@ -39,17 +41,17 @@ public class WeaponBehavour : MonoBehaviour
         }
     }
 
-    public void EquipWeapon(WeaponData weaponData)
+    public void EquipWeapon(ToolData weaponData)
     {
-        equipedWeapon = weaponData;
+        equipedTool = weaponData;
     }
 
     public void PlayAttackAnimation()
     {
-        overrideController["Empty"] = equipedWeapon.AttackAnimation;
+        overrideController["Empty"] = equipedTool.AttackAnimation;
         weaponAnimator.SetTrigger("Attack");
-        Invoke("EnableAttackZone", equipedWeapon.StartDamage);
-        Invoke("DisableAttackZone", equipedWeapon.EndDamage);
+        Invoke("EnableAttackZone", equipedTool.StartDamage);
+        Invoke("DisableAttackZone", equipedTool.EndDamage);
     }
 
     private void EnableAttackZone ()

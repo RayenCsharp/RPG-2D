@@ -18,6 +18,12 @@ public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     [Header("Item Properties")]
     private ItemData itemHeld;
     private int quantityHeld;
+    [Header("Equipment Slot Proprities")]
+    [SerializeField] private bool equipmentSlot;
+    public bool EquipmentSlot => equipmentSlot; // will be used for Slot script to block Drop Event
+    public enum Equipment_Type { None, Tool}
+    [SerializeField] private Equipment_Type equipmentType;
+    public Equipment_Type EquipmentType => equipmentType;
 
     void Awake()
     {
@@ -93,19 +99,28 @@ public class ItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        transform.SetParent(dragLayer);
-        itemHolderCanvas.blocksRaycasts = false;
+        if (!equipmentSlot)
+        {
+            transform.SetParent(dragLayer);
+            itemHolderCanvas.blocksRaycasts = false;
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        transform.position = eventData.position;
+        if (!equipmentSlot)
+        {
+            transform.position = eventData.position;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.SetParent(OrignalParent);
-        itemHolderCanvas.blocksRaycasts = true;
+        if (!equipmentSlot)
+        {
+            transform.SetParent(OrignalParent);
+            itemHolderCanvas.blocksRaycasts = true;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)

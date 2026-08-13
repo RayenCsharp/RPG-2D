@@ -1,20 +1,23 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InventorySystem : MonoBehaviour
 {
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private AttackController attackController;
     [Header("Inventory References")]
     [SerializeField] private GameObject mainInvetory;
+    [SerializeField] private GameObject backPackInventory;
     [SerializeField] private GameObject hotBarInventory;
-    private List<ItemHolder> MainInventorySlots = new List<ItemHolder>();
+    [SerializeField] private GameObject equipmentInventory;
+    private List<ItemHolder> BackPackInventory = new List<ItemHolder>();
     private List<ItemHolder> HotBarSlots = new List<ItemHolder>();
     private List<ItemHolder> HoleInventory = new List<ItemHolder>();
+    private List<ItemHolder> EquipmentSlots = new List<ItemHolder>();
     [Header("Bindings Proprities")]
     private bool inventoryOpen;
     public bool InventoryOpen => inventoryOpen;
@@ -32,10 +35,12 @@ public class InventorySystem : MonoBehaviour
     void Awake()
     {
         playerController = GetComponent<PlayerController>();
-        MainInventorySlots.AddRange(mainInvetory.GetComponentsInChildren<ItemHolder>());
+        attackController = GetComponent<AttackController>();
+        BackPackInventory.AddRange(backPackInventory.GetComponentsInChildren<ItemHolder>());
         HotBarSlots.AddRange(hotBarInventory.GetComponentsInChildren<ItemHolder>());
         HoleInventory.AddRange(HotBarSlots);
-        HoleInventory.AddRange(MainInventorySlots);
+        HoleInventory.AddRange(BackPackInventory);
+        EquipmentSlots.AddRange(equipmentInventory.GetComponentsInChildren<ItemHolder>());
     }
     private void Start()
     {
@@ -208,7 +213,7 @@ public class InventorySystem : MonoBehaviour
         }
         else
         {
-            itemToDrop = HoveredItemFilter();
+            itemToDrop = HoveredItemFilter(HoleInventory);
         }
 
         if (itemToDrop == null)
@@ -223,9 +228,60 @@ public class InventorySystem : MonoBehaviour
         itemRb.AddForce(playerController.LastMovementDirection * dropForce, ForceMode2D.Impulse);
     }
 
-    private ItemHolder HoveredItemFilter()
+    private void OnEquip_UnEquip(InputValue Value) // will be changed to interact with consumbles too...
     {
-        foreach (ItemHolder item in HoleInventory)
+        Debug.Log("Equip Called");
+        ItemHolder itemToEquip;
+        if (!InventoryOpen)
+        {
+            itemToEquip = selectedItem;
+        }
+        else
+        {
+            itemToEquip = HoveredItemFilter(HoleInventory);
+        }
+
+        if (itemToEquip == null)
+        {
+            ItemHolder equipedItem = HoveredItemFilter(EquipmentSlots);
+            if (equipedItem != null)
+            {
+                foreach (ItemHolder availbleSlot in HoleInventory)
+                {
+                    if (!availbleSlot.HasItem())
+                    {
+                        availbleSlot.SetItem(equipedItem.ItemHeld, equipedItem.QuantityHeld);
+                        equipedItem.SetItem(null, 0);
+                        attackController.EquipTool(null);
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+        if (!itemToEquip.HasItem())
+            return;
+        foreach (ItemHolder item in EquipmentSlots)
+        {
+            if (itemToEquip.ItemHeld is ToolData tool && item.EquipmentType == ItemHolder.Equipment_Type.Tool)
+            {
+                ItemData tmpItem = item.ItemHeld;
+                int tmpAmmount = item.QuantityHeld;
+                item.SetItem(itemToEquip.ItemHeld, itemToEquip.QuantityHeld);
+                itemToEquip.SetItem(tmpItem, tmpAmmount);
+                attackController.EquipTool(tool);
+            }
+            else
+            {
+                Debug.Log("This item isn't equippable as a tool.");
+            }
+        }
+    }
+
+
+    private ItemHolder HoveredItemFilter(List<ItemHolder> Inventory)
+    {
+        foreach (ItemHolder item in Inventory)
         {
             if (item.IsHovering)
                 return item;

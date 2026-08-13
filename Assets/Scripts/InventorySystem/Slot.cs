@@ -19,6 +19,8 @@ public class Slot : MonoBehaviour, IDropHandler
     {
         ItemHolder droppedToItem = GetComponentInChildren<ItemHolder>();
         ItemHolder draggedItem = eventData.pointerDrag.GetComponent<ItemHolder>();
+        if (draggedItem.EquipmentSlot || droppedToItem.EquipmentSlot)
+            return;
         inventorySys.HandleDrop(draggedItem, droppedToItem);
 
     }

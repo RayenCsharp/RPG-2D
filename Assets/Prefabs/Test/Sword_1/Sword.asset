@@ -24,9 +24,9 @@ MonoBehaviour:
   damage: 0
   knockback: 0
   speed: 0
-  toolRange: {x: 0, y: 0}
-  offSetRange: {x: 0, y: 0}
-  startDamage: 0
-  endDamage: 0
-  animationDuration: 0
-  attackAnimation: {fileID: 0}
+  toolRange: {x: 0.8, y: 0.7}
+  offSetRange: {x: -0.08, y: -0.22}
+  startDamage: 0.03
+  endDamage: 0.15
+  animationDuration: 0.2
+  attackAnimation: {fileID: 7400000, guid: f35f8dcf8e4849b478c75f53acd27b4f, type: 2}

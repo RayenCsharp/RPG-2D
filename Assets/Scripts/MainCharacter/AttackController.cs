@@ -1,4 +1,3 @@
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,7 +11,7 @@ public class AttackController : MonoBehaviour
     [SerializeField] private Transform weaponEquipped;
     [SerializeField] private CapsuleCollider2D weaponCollider;
 
-    [SerializeField] private WeaponData equipedWeapon;
+    [SerializeField] private ToolData equippedTool;
     [SerializeField] private float offSetDistance = 0.5f;
 
 
@@ -32,19 +31,27 @@ public class AttackController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        weaponEquipped.position = (Vector2)transform.position + playerController.LastMovementDirection * offSetDistance;
-        weaponEquipped.rotation = Quaternion.LookRotation(Vector3.forward, -playerController.LastMovementDirection);
-        weaponCollider.size = new Vector2(equipedWeapon.WeaponRange.x, weaponCollider.size.y);
-        weaponCollider.offset = equipedWeapon.OffsetRange;
+        if (equippedTool != null)
+        {
+            weaponEquipped.position = (Vector2)transform.position + playerController.LastMovementDirection * offSetDistance;
+            weaponEquipped.rotation = Quaternion.LookRotation(Vector3.forward, -playerController.LastMovementDirection);
+            weaponCollider.size = new Vector2(equippedTool.ToolRange.x, weaponCollider.size.y);
+            weaponCollider.offset = equippedTool.OffsetRange;
 
-        weaponBehavour.EquipWeapon(equipedWeapon);
+            weaponBehavour.EquipWeapon(equippedTool);
+        }
+    }
+
+    public void EquipTool(ToolData tool)
+    {
+        equippedTool = tool;
     }
 
     void OnAttack(InputValue value)
     {
-        if (value.isPressed && playerController.canAttack && !inventorySystem.InventoryOpen)
+        if (value.isPressed && playerController.canAttack && !inventorySystem.InventoryOpen && equippedTool != null)
         {
-            float attackSpeedMultiplier = 0.45f / equipedWeapon.AttackTime;
+            float attackSpeedMultiplier = 0.45f / equippedTool.AnimationDuration;
             playerAnimator.SetFloat("AttackSpeedMultiplier", attackSpeedMultiplier);
             playerAnimator.SetTrigger("Attack");
             weaponBehavour.PlayAttackAnimation();
